@@ -1,0 +1,27 @@
+{
+  "name": "holy_grail",
+  "private": true,
+  "version": "1.0.0",
+  "authors": [
+    "Justin Christensen <wroathe@gmail.com>"
+  ],
+  "description": "Example Backbone architecture",
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backbone": "1.1.2",
+    "bootstrap-sass-official": "3.3.3",
+    "handlebars": "3.0.0",
+    "lodash": "~3.5.0",
+    "jquery": "~2.1.3"
+  }
+}
