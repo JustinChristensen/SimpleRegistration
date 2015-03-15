@@ -1,8 +1,11 @@
 define(function (require) {
 
-    require("common");
+    require("config");
 
-    require([], function () {
+    require(["action", "backbone"], function (action, Backbone) {
+        action(action.MAIN).then(function () {
+            Backbone.history.start({ pushState: true });
+        });
     });
 
 });

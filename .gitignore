@@ -1,6 +1,8 @@
 *.sublime-*
 app/css/
-app/templates/
+app/js/templates/
 app/vendor/
 node_modules/
+bower_components/
+build/
 *.map
