@@ -7,21 +7,16 @@ define(function (require) {
 
     var appState = new ApplicationState();
 
-    var actions = {
-        "MAIN": "actions/main",
-        "LOGIN": "actions/login",
-        "REGISTER": "actions/register",
-        "USERS": "actions/users"
-    };
+    function action(path, data, options) {
+        data = data || {};
+        options = options || {};
 
-    var paths = _.invert(actions);
-
-    function action(path, data) {
         return new Promise(function (resolve, reject) {
             require([path], function (actionFn) {
-                // action.previous = action.current;
-                // action.current = paths[path];
-                actionFn.call(this, appState, data);
+                if (!options.defer) {
+                    actionFn.call(this, appState, data);
+                }
+
                 resolve();
             }, function (error) {
                 reject(error);
@@ -29,6 +24,11 @@ define(function (require) {
         });
     }
 
-    return _.extend(action, actions);
+    return _.extend(action, {
+        "MAIN": "actions/main",
+        "LOGIN": "actions/login",
+        "REGISTER": "actions/register",
+        "USERS": "actions/users"
+    });
 
 });

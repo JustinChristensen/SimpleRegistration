@@ -1,9 +1,9 @@
 define(function (require) {
 
-    var Backbone = require("backbone");
+    var BaseRouter = require("routers/BaseRouter");
     var action = require("action");
 
-    var AppRouter = Backbone.Router.extend({
+    var AppRouter = BaseRouter.extend({
 
         routes: {
             "": "login",

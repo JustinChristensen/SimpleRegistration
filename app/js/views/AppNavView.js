@@ -1,9 +1,9 @@
 define(function (require) {
 
-    var Backbone = require("backbone");
+    var BaseView = require("views/BaseView");
     var appNavTemplate = require("templates/appNav");
 
-    var AppNavView = Backbone.View.extend({
+    var AppNavView = BaseView.extend({
 
         tagName: "nav",
         className: "app-nav",
@@ -15,6 +15,8 @@ define(function (require) {
         },
 
         initialize: function (options) {
+            options = options || {};
+            BaseView.prototype.initialize.apply(this, arguments);
             this.router = options.router;
         },
 

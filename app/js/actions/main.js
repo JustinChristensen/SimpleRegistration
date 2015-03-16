@@ -5,7 +5,9 @@ define(function (require) {
     var AppRouter = require("routers/AppRouter");
 
     return function (appState, data) {
+        // kick this off right away
         var appRouter = new AppRouter();
+        Backbone.history.start({ pushState: true });
 
         var appNavView = new AppNavView({
             router: appRouter
@@ -15,10 +17,6 @@ define(function (require) {
 
         appNavView.render();
         appView.render();
-
-        appState.appRouter = appRouter;
-        appState.appNavView = appNavView;
-        appState.appView = appView;
     };
 
 });

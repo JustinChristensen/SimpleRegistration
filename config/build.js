@@ -3,12 +3,22 @@ module.exports = {
         {
             name: "main",
             include: [
+                "affix",
+                "alert",
+                "button",
+                "carousel",
+                "collapse",
+                "dropdown",
+                "modal",
+                "popover",
+                "scrollspy",
+                "tab",
+                "tooltip",
+                "transition",
                 "jquery",
-                "bootstrap",
                 "underscore",
                 "backbone",
                 "handlebars",
-                "action",
                 "actions/main"
             ]
         },

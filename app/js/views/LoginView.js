@@ -2,10 +2,10 @@ define(function (require) {
 
     var BaseView = require("views/BaseView");
 
-    var AppView = BaseView.extend({
+    var LoginView = BaseView.extend({
 
         tagName: "div",
-        className: "app",
+        className: "login",
 
         initialize: function (options) {
             BaseView.prototype.initialize.apply(this, arguments);
@@ -17,6 +17,6 @@ define(function (require) {
 
     });
 
-    return AppView;
+    return LoginView;
 
 });

@@ -1,11 +1,10 @@
 define(function (require) {
 
     require("config");
+    require("action");
 
-    require(["action", "backbone"], function (action, Backbone) {
-        action(action.MAIN).then(function () {
-            Backbone.history.start({ pushState: true });
-        });
+    require(["action"], function (action) {
+        action(action.MAIN);
     });
 
 });
