@@ -19,6 +19,7 @@ module.exports = {
                 "underscore",
                 "backbone",
                 "handlebars",
+                "immutable",
                 "actions/main"
             ]
         },

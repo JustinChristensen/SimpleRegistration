@@ -1,4 +1,5 @@
 define(function (require) {
+    "use strict";
 
     var BaseView = require("views/BaseView");
 

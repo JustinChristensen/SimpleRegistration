@@ -4,7 +4,7 @@ define(function (require) {
     require("action");
 
     require(["action"], function (action) {
-        action(action.MAIN);
+        action(action.AM.get("MAIN"));
     });
 
 });

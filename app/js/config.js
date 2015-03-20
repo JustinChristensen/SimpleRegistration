@@ -16,7 +16,8 @@ require.config({
         "underscore": "../vendor/lodash/lodash",
         "backbone": "../vendor/backbone/backbone",
         "handlebars": "../vendor/handlebars/handlebars.runtime",
-        "promise": "../vendor/es6-promise/promise"
+        "promise": "../vendor/es6-promise/promise",
+        "immutable": "../vendor/immutable/dist/immutable"
     },
     shim: {
         "affix": {

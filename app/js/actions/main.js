@@ -1,22 +1,22 @@
 define(function (require) {
+    "use strict";
 
+    var Backbone = require("backbone");
     var AppView = require("views/AppView");
-    var AppNavView = require("views/AppNavView");
     var AppRouter = require("routers/AppRouter");
 
     return function (appState, data) {
-        // kick this off right away
+        var appView = new AppView();
         var appRouter = new AppRouter();
-        Backbone.history.start({ pushState: true });
 
-        var appNavView = new AppNavView({
-            router: appRouter
+        Backbone.history.start({
+            pushState: true
         });
 
-        var appView = new AppView();
-
-        appNavView.render();
         appView.render();
+
+        appState.appView = appView;
+        appState.appRouter = appRouter;
     };
 
 });

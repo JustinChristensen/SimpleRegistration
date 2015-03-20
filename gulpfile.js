@@ -1,3 +1,5 @@
+"use strict";
+
 var gulp = require("gulp");
 var $ = require("gulp-load-plugins")(); // requires gulp-* prefixed plugins in package.json
 var pageSpeed = require("psi");
@@ -5,15 +7,17 @@ var browserSync = require("browser-sync");
 var requirejs = require("requirejs");
 var through2 = require("through2");
 var morgan = require("morgan");
+var del = require("del");
+var runSequence = require("run-sequence");
 /* jshint ignore:start */
 var Promise = require("es6-promise").Promise;
 /* jshint ignore:end */
-var del = require("del");
 var reload = browserSync.reload;
 
 // arguments
 var argv = require("yargs")
     .default("sourcemaps", false)
+    .default("dev", false)
     .argv;
 
 // application paths
@@ -40,6 +44,7 @@ filesets.sass           = paths.app + "/sass/**/*.scss";
 filesets.templates      = paths.app + "/templates/**/*.hbs";
 filesets.css            = paths.app + "/css/**/*.css";
 filesets.js             = paths.app + "/js/**/*.js";
+filesets.jshint         = paths.app + "/js/!(templates)/**/*.js";
 filesets.html           = paths.app + "/**/*.html";
 filesets.buildVendorJs  = paths.buildVendor + "/**/*.js";
 
@@ -51,36 +56,16 @@ function logDeleted(title, paths) {
     }
 }
 
-/**
- * Task Summary:
- *
- * default              Development task. Watches filesystem for changes, and performs a variety of tasks automatically
- * jshint               Checks that established Javascript best practices are followed
- * csslint              Checks that established CSS best practices are followed
- * check-style          Checks that application Javascript follows established style
- * page-speed           Runs Google's page speed analyzer and reports areas for performance improvements
- * coverage             Runs coverage analysis and generates a test coverage report
- * complexity           Runs a complexity analysis using plato and generates a complexity report
- * test                 Runs the unit tests for this application one time
- * docs                 Generates documentation using (TODO: pick doc generator)
- * dependencies         Generates a dependency graph for RequireJS
- * optimize-images      Optimizes image resources
-    * compile-templates    Compiles Handlebars templates from /templates to /js/templates
-    * compile-sass         Compiles SASS to stylesheets from /sass to /css. Also runs the autoprefixer on the generated CSS. Optionally generates sourcemaps.
- * build                Runs tests, compiles templates, SASS, optimizes images, runs the requirejs optimizer, and then checks the build
- * buildcheck           Verifies that the built directory contains the correct subdirectories and files, and only those files and directories
- * publish              Gzip's and publishes front-end resources to the CDN
-    * clean                Removes all generated files. This includes compiled templates, CSS, and the build folder
-    * maintainer-clean     Runs clean and also deletes node_modules and all bower dependencies (npm install and bower install to re-install them)
- * watch                Watches the filesystem for changes and compiles, tests, and reloads things
-    * serve                Serve the app directory
-    * serve-build          Serve the build directory
- */
-
-gulp.task("default", []);
+// tasks
+gulp.task("default", [
+    "watch",
+    "serve"
+]);
 
 gulp.task("jshint", function () {
-
+    return gulp.src(filesets.jshint)
+        .pipe($.jshint())
+        .pipe($.jshint.reporter("jshint-stylish"));
 });
 
 gulp.task("csslint", function () {
@@ -96,10 +81,6 @@ gulp.task("page-speed", function () {
 });
 
 gulp.task("coverage", function () {
-
-});
-
-gulp.task("complexity", function () {
 
 });
 
@@ -167,13 +148,13 @@ gulp.task("build", ["compile-templates", "compile-sass"], function () {
             $.util.log($.util.colors.green("Build Successful!"));
             console.log(buildResponse);
 
-            $.util.log($.util.colors.green("Deleting unwanted bower components..."));
+            $.util.log($.util.colors.gray("Deleting packaged bower components..."));
 
             del(paths.buildWhiteList, function (error, deletedPaths) {
                 if (!error) {
-                    logDeleted("Delete successful!", deletedPaths);
+                    logDeleted("Deleted the following files and directories:", deletedPaths);
 
-                    $.util.log($.util.colors.green("Optimizing remaining bower components..."));
+                    $.util.log($.util.colors.gray("Optimizing remaining bower components..."));
 
                     gulp.src(filesets.buildVendorJs)
                         .pipe($.uglify())
@@ -201,25 +182,6 @@ gulp.task("publish", function () {
 
 });
 
-gulp.task("maintainer-clean", ["clean"], function () {
-    $.util.log("Cleaning...");
-
-    return new Promise(function (resolve, reject) {
-        del([
-            paths.nodeModules,
-            paths.vendor
-        ], function (error, deletedPaths) {
-            if (!error) {
-                logDeleted("Clean successful!", deletedPaths);
-                resolve();
-            }
-            else {
-                reject(error);
-            }
-        });
-    });
-});
-
 gulp.task("clean", function () {
     $.util.log("Cleaning...");
 
@@ -240,29 +202,21 @@ gulp.task("clean", function () {
     });
 });
 
-gulp.task("watch", function () {
+gulp.task("watch-sass", function () {
+    gulp.watch(filesets.sass, ["compile-sass"]);
 });
+
+gulp.task("watch-templates", function () {
+    gulp.watch(filesets.templates, ["compile-templates"]);
+});
+
+gulp.task("watch", [
+    "watch-sass",
+    "watch-templates"
+]);
 
 gulp.task("serve", function () {
-    browserSync({
-        server: {
-            baseDir: "app",
-            middleware: morgan("dev")
-        },
-        port: 3000,
-        logSnippet: false,
-        open: false,
-        notify: false,
-        files: [
-            filesets.js,
-            filesets.css,
-            filesets.html
-        ]
-    });
-});
-
-gulp.task("serve-build", function () {
-    browserSync({
+    var serverOptions = {
         server: {
             baseDir: "build"
         },
@@ -270,5 +224,17 @@ gulp.task("serve-build", function () {
         logSnippet: false,
         open: false,
         notify: false
-    });
+    };
+
+    if (argv.dev) {
+        serverOptions.server.baseDir = "app";
+        serverOptions.server.middleware = morgan("dev");
+        serverOptions.files = [
+            filesets.js,
+            filesets.css,
+            filesets.html
+        ];
+    }
+
+    browserSync(serverOptions);
 });

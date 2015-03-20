@@ -1,4 +1,5 @@
 define(function (require) {
+    "use strict";
 
     var BaseRouter = require("routers/BaseRouter");
     var action = require("action");
@@ -12,15 +13,15 @@ define(function (require) {
         },
 
         login: function () {
-            action(action.LOGIN);
+            action(action.AM.get("LOGIN"));
         },
 
         register: function () {
-            action(action.REGISTER);
+            action(action.AM.get("REGISTER"));
         },
 
         users: function () {
-            action(action.USERS);
+            action(action.AM.get("USERS"));
         }
 
     });
