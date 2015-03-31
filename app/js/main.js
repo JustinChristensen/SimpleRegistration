@@ -1,4 +1,5 @@
 define(function (require) {
+    "use strict";
 
     require("config");
     require("action");

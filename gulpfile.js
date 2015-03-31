@@ -44,7 +44,10 @@ filesets.sass           = paths.app + "/sass/**/*.scss";
 filesets.templates      = paths.app + "/templates/**/*.hbs";
 filesets.css            = paths.app + "/css/**/*.css";
 filesets.js             = paths.app + "/js/**/*.js";
-filesets.jshint         = paths.app + "/js/!(templates)/**/*.js";
+filesets.jshint         = [
+    paths.app + "/js/!(templates)/**/*.js",
+    paths.app + "/js/*.js"
+];
 filesets.html           = paths.app + "/**/*.html";
 filesets.buildVendorJs  = paths.buildVendor + "/**/*.js";
 

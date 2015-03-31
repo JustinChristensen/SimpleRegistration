@@ -5,6 +5,9 @@
   "description": "Example Backbone architecture",
   "author": "Justin Christensen <wroathe@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "test": "mocha"
+  },
   "devDependencies": {
     "browser-sync": "2.2.4",
     "del": "1.1.1",
@@ -27,7 +30,7 @@
     "gulp-uglify": "1.1.0",
     "gulp-util": "3.0.4",
     "jshint-stylish": "1.0.1",
-    "karma": "0.12.31",
+    "mocha": "2.2.1",
     "morgan": "1.5.1",
     "psi": "1.0.6",
     "requirejs": "2.1.16",

@@ -1,8 +1,9 @@
 define(function (require) {
     "use strict";
 
-    return function (appState, data) {
+    var LoginView = require("views/LoginView");
 
+    return function (appState, data) {
     };
 
 });
