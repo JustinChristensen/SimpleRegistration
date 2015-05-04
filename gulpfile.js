@@ -3,16 +3,11 @@
 var gulp = require("gulp");
 var $ = require("gulp-load-plugins")(); // requires gulp-* prefixed plugins in package.json
 var pageSpeed = require("psi");
-var browserSync = require("browser-sync");
 var requirejs = require("requirejs");
-var through2 = require("through2");
-var morgan = require("morgan");
 var del = require("del");
-var runSequence = require("run-sequence");
 /* jshint ignore:start */
 var Promise = require("es6-promise").Promise;
 /* jshint ignore:end */
-var reload = browserSync.reload;
 
 // arguments
 var argv = require("yargs")
@@ -26,15 +21,16 @@ var paths = {};
 paths.app               = "app";
 paths.build             = "build";
 paths.nodeModules       = "node_modules";
+paths.logs              = "logs";
 paths.js                = paths.app + "/js";
 paths.css               = paths.app + "/css";
-paths.vendor            = paths.app + "/vendor";
+paths.bowerComponents   = paths.app + "/bower_components";
 paths.compiledTemplates = paths.js + "/templates";
-paths.buildVendor       = paths.build + "/vendor";
+paths.buildComponents   = paths.build + "/bower_components";
 paths.buildWhiteList    = [
-    paths.buildVendor + "/!(requirejs|bootstrap-sass-official)",
-    paths.buildVendor + "/bootstrap-sass-official/!(assets)",
-    paths.buildVendor + "/bootstrap-sass-official/assets/!(fonts)"
+    paths.buildComponents + "/!(requirejs|bootstrap-sass-official)",
+    paths.buildComponents + "/bootstrap-sass-official/!(assets)",
+    paths.buildComponents + "/bootstrap-sass-official/assets/!(fonts)"
 ];
 
 // globbing patterns
@@ -44,25 +40,39 @@ filesets.sass           = paths.app + "/sass/**/*.scss";
 filesets.templates      = paths.app + "/templates/**/*.hbs";
 filesets.css            = paths.app + "/css/**/*.css";
 filesets.js             = paths.app + "/js/**/*.js";
+filesets.logs           = paths.logs + "/**/*.log";
 filesets.jshint         = [
     paths.app + "/js/!(templates)/**/*.js",
     paths.app + "/js/*.js"
 ];
 filesets.html           = paths.app + "/**/*.html";
-filesets.buildVendorJs  = paths.buildVendor + "/**/*.js";
+filesets.buildJs        = paths.buildComponents + "/**/*.js";
+
+var createFormat = $.util.colors.green("CREATE") + " %s";
+var deleteFormat = $.util.colors.red("DELETE") + " %s";
 
 // helper functions
-function logDeleted(title, paths) {
-    if (paths && paths.length) {
-        $.util.log($.util.colors.green(title));
-        console.log(paths.join("\n") + "\n");
+function logArray(arr, format) {
+    var i, len;
+
+    if (arr && arr.length) {
+        for (i = 0, len = arr.length; i < len; i++) {
+            console.log(format, arr[i]);
+        }
     }
+}
+
+function logCreatedFiles(paths) {
+    logArray(paths, createFormat);
+}
+
+function logDeletedFiles(paths) {
+    logArray(paths, deleteFormat);
 }
 
 // tasks
 gulp.task("default", [
-    "watch",
-    "serve"
+    "watch"
 ]);
 
 gulp.task("jshint", function () {
@@ -80,14 +90,6 @@ gulp.task("check-style", function () {
 });
 
 gulp.task("page-speed", function () {
-
-});
-
-gulp.task("coverage", function () {
-
-});
-
-gulp.task("test", function () {
 
 });
 
@@ -116,7 +118,8 @@ gulp.task("compile-templates", function () {
 gulp.task("compile-sass", function () {
     var sassConfig = {
         includePaths: [
-            paths.vendor + "/bootstrap-sass-official/assets/stylesheets"
+            paths.bowerComponents + "/bootstrap-sass-official/assets/stylesheets",
+            paths.bowerComponents + "/spinkit/scss"
         ],
         sourceComments: true
     };
@@ -143,27 +146,28 @@ gulp.task("compile-sass", function () {
         .pipe(gulp.dest(paths.css));
 });
 
-gulp.task("build", ["compile-templates", "compile-sass"], function () {
+gulp.task("compile", ["compile-templates", "compile-sass"]);
+
+gulp.task("build", ["compile"], function () {
     return new Promise(function (resolve, reject) {
         var buildConfig = require("./config/build");
 
         requirejs.optimize(buildConfig, function (buildResponse) {
-            $.util.log($.util.colors.green("Build Successful!"));
-            console.log(buildResponse);
+            console.log($.util.colors.green("Build Report"));
 
-            $.util.log($.util.colors.gray("Deleting packaged bower components..."));
+            console.log(buildResponse);
 
             del(paths.buildWhiteList, function (error, deletedPaths) {
                 if (!error) {
-                    logDeleted("Deleted the following files and directories:", deletedPaths);
+                    $.util.log($.util.colors.red("Deleting bower components."));
 
-                    $.util.log($.util.colors.gray("Optimizing remaining bower components..."));
+                    logDeletedFiles(deletedPaths);
 
-                    gulp.src(filesets.buildVendorJs)
+                    gulp.src(filesets.buildJs)
                         .pipe($.uglify())
-                        .pipe(gulp.dest(paths.buildVendor));
+                        .pipe(gulp.dest(paths.buildComponents));
 
-                    $.util.log($.util.colors.green("Bower components optimized!"));
+                    $.util.log($.util.colors.green("Build successful. Check build.txt for details."));
 
                     resolve();
                 }
@@ -186,16 +190,15 @@ gulp.task("publish", function () {
 });
 
 gulp.task("clean", function () {
-    $.util.log("Cleaning...");
-
     return new Promise(function (resolve, reject) {
         del([
             paths.build,
             paths.css,
-            paths.compiledTemplates
+            paths.compiledTemplates,
+            filesets.logs
         ], function (error, deletedPaths) {
             if (!error) {
-                logDeleted("Clean successful!", deletedPaths);
+                logDeletedFiles(deletedPaths);
                 resolve();
             }
             else {
@@ -217,27 +220,3 @@ gulp.task("watch", [
     "watch-sass",
     "watch-templates"
 ]);
-
-gulp.task("serve", function () {
-    var serverOptions = {
-        server: {
-            baseDir: "build"
-        },
-        port: 3000,
-        logSnippet: false,
-        open: false,
-        notify: false
-    };
-
-    if (argv.dev) {
-        serverOptions.server.baseDir = "app";
-        serverOptions.server.middleware = morgan("dev");
-        serverOptions.files = [
-            filesets.js,
-            filesets.css,
-            filesets.html
-        ];
-    }
-
-    browserSync(serverOptions);
-});

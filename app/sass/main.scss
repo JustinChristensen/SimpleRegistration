@@ -1,1 +1,9 @@
+$bgColor: #d35400;
+$spinkit-spinner-color: #fff;
+
 @import "bootstrap_custom";
+@import "spinners/7-three-bounce";
+
+body {
+    background: $bgColor;
+}
